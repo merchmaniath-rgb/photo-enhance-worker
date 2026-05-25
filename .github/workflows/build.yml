@@ -12,6 +12,17 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Free disk space (runner has only 14GB by default, our base is huge)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - name: Checkout
         uses: actions/checkout@v4
 

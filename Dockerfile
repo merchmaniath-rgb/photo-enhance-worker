@@ -6,7 +6,7 @@
 # Built via GitHub Actions, published to ghcr.io (public).
 # Pulled by RunPod Serverless endpoint = no local Docker needed.
 
-FROM runpod/worker-comfyui:5.8.5-base-cuda12.4.1
+FROM runpod/worker-comfyui:5.8.5-base-cuda12.8.1
 
 # 1. Install facerestore_cf custom node (provides FaceRestoreModelLoader + FaceRestoreCFWithModel)
 RUN cd /comfyui/custom_nodes && \

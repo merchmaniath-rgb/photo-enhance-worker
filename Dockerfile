@@ -13,15 +13,16 @@ RUN cd /comfyui/custom_nodes && \
     git clone --depth 1 https://github.com/mav-rik/facerestore_cf.git
 
 # 2. Python deps for face restore.
-#    - facexlib: face detection + parsing (RetinaFace + ParseNet)
-#    - chainner_models: model loaders for upscalers / restorers
-#    - timm: backbone for some face models
-#    - opencv-python-headless: face restore needs cv2 (no GUI on server)
-RUN pip install --no-cache-dir \
-    facexlib==0.3.0 \
-    chainner_models==1.0.4 \
-    timm \
-    opencv-python-headless
+#    - facexlib: face detection + parsing (RetinaFace + ParseNet) — the hard dep
+#    - opencv-python-headless: cv2 without GUI bindings
+# Note: basicsr (pulled in by facexlib) has broken import on newer torchvision —
+# patch it after install.
+RUN pip install --no-cache-dir facexlib opencv-python-headless && \
+    BASICSR_FILE=$(python -c "import basicsr.data.degradations as d; print(d.__file__)" 2>/dev/null) && \
+    if [ -n "$BASICSR_FILE" ]; then \
+        sed -i 's|from torchvision.transforms.functional_tensor import rgb_to_grayscale|from torchvision.transforms.functional import rgb_to_grayscale|g' "$BASICSR_FILE"; \
+        echo "Patched basicsr at $BASICSR_FILE"; \
+    fi
 
 # 3. Pre-download face detection models so first cold start doesn't have to.
 #    These go into /workspace/models/facedetection at runtime if missing — but if we put them
